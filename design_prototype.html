@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TeklifPro — Tasarım Prototipi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    /* ─── RESET & BASE ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:         #0b1120;
+      --bg2:        #111827;
+      --surface:    rgba(255,255,255,0.04);
+      --surface2:   rgba(255,255,255,0.08);
+      --border:     rgba(255,255,255,0.10);
+      --blue:       #3b82f6;
+      --blue-dark:  #2563eb;
+      --purple:     #8b5cf6;
+      --gold:       #f59e0b;
+      --gold-light: #fbbf24;
+      --red:        #ef4444;
+      --green:      #22c55e;
+      --text:       #f1f5f9;
+      --text2:      #94a3b8;
+      --text3:      #64748b;
+      --radius:     14px;
+      --radius-sm:  8px;
+      --shadow:     0 8px 32px rgba(0,0,0,0.4);
+      --shadow-lg:  0 20px 60px rgba(0,0,0,0.6);
+      --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 90px; /* bottom bar space */
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(59,130,246,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 90% 80%, rgba(139,92,246,0.10) 0%, transparent 50%);
+    }
+
+    /* ─── SCROLLBAR ─────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ─── TOP HEADER ─────────────────────────────────────────── */
+    .top-header {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(20px);
+      background: rgba(11,17,32,0.85);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Outfit', sans-serif;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+    }
+    .logo-text { font-size: 20px; font-weight: 700; color: var(--text); }
+    .logo-text span { color: var(--blue); }
+    .logo-sub { font-size: 11px; color: var(--text3); font-weight: 400; margin-top: 1px; }
+
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-icon {
+      width: 38px; height: 38px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: var(--transition);
+      font-size: 14px;
+    }
+    .btn-icon:hover { background: var(--surface2); color: var(--text); }
+
+    /* ─── MAIN CONTAINER ──────────────────────────────────────── */
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 28px 20px;
+    }
+
+    /* ─── PAGE TITLE ──────────────────────────────────────────── */
+    .page-title {
+      font-family: 'Outfit', sans-serif;
+      margin-bottom: 24px;
+    }
+    .page-title h1 {
+      font-size: clamp(22px, 5vw, 30px);
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, var(--blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .page-title p { font-size: 14px; color: var(--text3); margin-top: 4px; }
+
+    /* ─── CARDS ───────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+      transition: var(--transition);
+    }
+    .card:hover { border-color: rgba(59,130,246,0.25); }
+
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title .icon {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+    }
+
+    /* ─── FORM FIELDS ─────────────────────────────────────────── */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 580px) { .form-row { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 12px; font-weight: 500;
+      color: var(--text2); letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .field-wrap {
+      position: relative;
+      display: flex; align-items: center;
+    }
+    .field-wrap .field-icon {
+      position: absolute; left: 12px;
+      color: var(--text3); font-size: 14px;
+      pointer-events: none; z-index: 1;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      padding: 11px 14px 11px 38px;
+      transition: var(--transition);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .field input::placeholder, .field textarea::placeholder { color: var(--text3); }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--blue);
+      background: rgba(59,130,246,0.06);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    .field select { padding-left: 38px; cursor: pointer; }
+    .field select option { background: var(--bg2); }
+    .field textarea { padding-left: 14px; resize: vertical; min-height: 80px; }
+
+    /* ─── MADDE TABLOSU ───────────────────────────────────────── */
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+    }
+    .items-table thead th {
+      text-align: left;
+      font-size: 11px; font-weight: 500;
+      color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 0 8px 10px;
+    }
+    .items-table thead th:first-child { padding-left: 0; width: 40px; }
+    .items-table thead th:last-child  { padding-right: 0; width: 44px; }
+    .items-table thead th.col-desc  { min-width: 160px; }
+    .items-table thead th.col-qty   { width: 80px; }
+    .items-table thead th.col-unit  { width: 70px; }
+    .items-table thead th.col-price { width: 110px; }
+    .items-table thead th.col-total { width: 110px; text-align: right; }
+
+    .item-row td { padding: 5px 8px; vertical-align: middle; }
+    .item-row td:first-child { padding-left: 0; }
+    .item-row td:last-child  { padding-right: 0; text-align: center; }
+
+    .item-num {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .item-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 8px 10px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .item-input::placeholder { color: var(--text3); }
+    .item-input:focus {
+      border-color: var(--blue);
+      background: rgba(59,130,246,0.06);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.10);
+    }
+    .item-input.right { text-align: right; }
+
+    .item-total-cell {
+      text-align: right;
+      font-size: 13px; font-weight: 600;
+      color: var(--gold-light);
+      padding-right: 4px;
+      white-space: nowrap;
+    }
+
+    .btn-delete {
+      width: 30px; height: 30px;
+      background: rgba(239,68,68,0.10);
+      border: 1px solid rgba(239,68,68,0.20);
+      border-radius: 6px;
+      color: var(--red);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+    .btn-delete:hover {
+      background: rgba(239,68,68,0.20);
+      border-color: var(--red);
+    }
+
+    .table-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 4px 0;
+    }
+
+    .btn-add-item {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(59,130,246,0.08);
+      border: 1px dashed rgba(59,130,246,0.35);
+      border-radius: var(--radius-sm);
+      color: var(--blue);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 500;
+      padding: 10px 16px;
+      cursor: pointer; width: 100%;
+      transition: var(--transition);
+      margin-top: 4px;
+    }
+    .btn-add-item:hover {
+      background: rgba(59,130,246,0.14);
+      border-color: var(--blue);
+    }
+
+    /* ─── FİYAT ÖZETİ ─────────────────────────────────────────── */
+    .price-summary {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .price-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .price-row:last-child { border-bottom: none; }
+    .price-row .label { color: var(--text2); }
+    .price-row .value { font-weight: 600; font-family: 'Outfit', sans-serif; }
+    .price-row.subtotal .value { color: var(--text); }
+    .price-row.kdv .value { color: var(--text2); }
+    .price-row.total {
+      background: linear-gradient(135deg, rgba(59,130,246,0.10), rgba(139,92,246,0.10));
+    }
+    .price-row.total .label { color: var(--text); font-weight: 600; font-size: 15px; }
+    .price-row.total .value { color: var(--gold-light); font-size: 18px; font-weight: 700; }
+
+    .kdv-option {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 12px;
+    }
+    .kdv-option label { font-size: 13px; color: var(--text2); }
+    .kdv-select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 6px 10px;
+      outline: none; cursor: pointer;
+    }
+    .kdv-select option { background: var(--bg2); }
+
+    /* ─── SAYGLARIMLA ─────────────────────────────────────────── */
+    .regards-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .regards-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+    }
+
+    /* ─── ACTION BUTTONS ──────────────────────────────────────── */
+    .actions {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: var(--transition);
+      flex: 1; min-width: 140px;
+      justify-content: center;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(59,130,246,0.45);
+    }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--surface2);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold), #d97706);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(245,158,11,0.35);
+    }
+    .btn-gold:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(245,158,11,0.45);
+    }
+
+    /* ─── BADGE ───────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center;
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.30);
+      color: var(--blue);
+      font-size: 11px; font-weight: 600;
+      padding: 3px 8px; border-radius: 20px;
+    }
+
+    /* ─── BOTTOM BAR ──────────────────────────────────────────── */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      backdrop-filter: blur(20px);
+      background: rgba(11,17,32,0.92);
+      border-top: 1px solid var(--border);
+      padding: 0 20px;
+      height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 24px; flex-wrap: wrap;
+      z-index: 100;
+    }
+    .bottom-info {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; color: var(--text3);
+      transition: var(--transition);
+      cursor: default;
+    }
+    .bottom-info:hover { color: var(--text2); }
+    .bottom-info i {
+      font-size: 11px;
+      color: var(--blue);
+    }
+    .bottom-divider {
+      width: 1px; height: 16px;
+      background: var(--border);
+    }
+    @media (max-width: 480px) {
+      .bottom-bar { gap: 12px; height: auto; padding: 10px 16px; }
+      .bottom-divider { display: none; }
+    }
+
+    /* ─── TEKLIF NO BADGE ─────────────────────────────────────── */
+    .teklif-no {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--text3);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+    .teklif-no span { color: var(--blue); font-weight: 600; font-family: 'Outfit', sans-serif; }
+
+    /* ─── DESIGN NOTE STRIP ───────────────────────────────────── */
+    .design-note {
+      background: linear-gradient(135deg, rgba(245,158,11,0.10), rgba(239,68,68,0.10));
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--gold);
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    /* ─── ANIMATIONS ──────────────────────────────────────────── */
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card { animation: fadeSlideIn 0.4s ease both; }
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.10s; }
+    .card:nth-child(3) { animation-delay: 0.15s; }
+    .card:nth-child(4) { animation-delay: 0.20s; }
+    .card:nth-child(5) { animation-delay: 0.25s; }
+    .card:nth-child(6) { animation-delay: 0.30s; }
+
+    /* ─── RESPONSIVE FIXES ────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .container { padding: 16px 14px; }
+      .card { padding: 16px; }
+      .items-table thead { display: none; }
+      .item-row { display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: center; margin-bottom: 8px; }
+      .item-row td { padding: 2px 4px; }
+      .items-table { display: block; }
+      .items-table tbody { display: block; }
+      .col-qty-cell, .col-unit-cell, .col-price-cell { display: none; }
+    }
+
+    /* Tooltip-like design label */
+    .screen-label {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text3);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .screen-label::before, .screen-label::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── TOP HEADER ──────────────────────────────────────────── -->
+  <header class="top-header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-text">Teklif<span>Pro</span></div>
+        <div class="logo-sub">Hızlı & Profesyonel Teklif</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="teklif-no">
+        <i class="fa-solid fa-hashtag" style="font-size:11px; color:var(--text3);"></i>
+        Teklif No: <span>#2024-0001</span>
+      </div>
+      <button class="btn-icon" title="Ayarlar"><i class="fa-solid fa-gear"></i></button>
+    </div>
+  </header>
+
+  <!-- ─── MAIN CONTENT ────────────────────────────────────────── -->
+  <main class="container">
+
+    <div class="page-title">
+      <h1>Yeni Teklif Oluştur</h1>
+      <p>Aşağıdaki alanları doldurarak profesyonel teklifinizi hazırlayın</p>
+    </div>
+
+    <div class="design-note">
+      <i class="fa-solid fa-palette"></i>
+      <strong>Tasarım Prototipi</strong> — Bu ekran yalnızca görsel tasarımı göstermektedir.
+    </div>
+
+    <!-- KART 1 — Genel Bilgiler -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon"><i class="fa-solid fa-file-lines" style="color:#fff; font-size:12px;"></i></div>
+          Teklif Bilgileri
+        </div>
+        <span class="badge">Adım 1 / 4</span>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Teklif Tarihi</label>
+          <div class="field-wrap">
+            <i class="fa-solid fa-calendar-days field-icon"></i>
+            <input type="date" value="2024-06-07" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Geçerlilik Süresi</label>
+          <div class="field-wrap">
+            <i class="fa-solid fa-clock field-icon"></i>
+            <select>
+              <option>30 gün</option>
+              <option>15 gün</option>
+              <option>45 gün</option>
+              <option>60 gün</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KART 2 — Firma Bilgileri -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon"><i class="fa-solid fa-building" style="color:#fff; font-size:12px;"></i></div>
+          Teklif Verilen Firma
+        </div>
+        <span class="badge">Adım 2 / 4</span>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Firma Adı</label>
+        <div class="field-wrap">
+          <i class="fa-solid fa-briefcase field-icon"></i>
+          <input type="text" placeholder="ABC Teknoloji A.Ş." />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>İlgili Kişi (Opsiyonel)</label>
+          <div class="field-wrap">
+            <i class="fa-solid fa-user field-icon"></i>
+            <input type="text" placeholder="Ahmet Yılmaz" />
+          </div>
+        </div>
+        <div class="field">
+          <label>E-posta (Opsiyonel)</label>
+          <div class="field-wrap">
+            <i class="fa-solid fa-envelope field-icon"></i>
+            <input type="email" placeholder="ahmet@abc.com.tr" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KART 3 — Teklif Maddeleri -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon"><i class="fa-solid fa-list-check" style="color:#fff; font-size:12px;"></i></div>
+          Teklif Maddeleri
+        </div>
+        <span class="badge">Adım 3 / 4</span>
+      </div>
+
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="col-desc">Açıklama</th>
+            <th class="col-qty">Miktar</th>
+            <th class="col-unit">Birim</th>
+            <th class="col-price">Birim Fiyat (₺)</th>
+            <th class="col-total" style="text-align:right;">Toplam (₺)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="items-body">
+          <!-- Row 1 -->
+          <tr class="item-row">
+            <td><div class="item-num">1</div></td>
+            <td class="col-desc-cell"><input class="item-input" type="text" placeholder="Hizmet/ürün açıklaması…" value="Web Sitesi Tasarımı" /></td>
+            <td class="col-qty-cell"><input class="item-input right" type="number" value="1" min="1" /></td>
+            <td class="col-unit-cell"><input class="item-input" type="text" value="Adet" /></td>
+            <td class="col-price-cell"><input class="item-input right" type="number" value="8000" placeholder="0,00" /></td>
+            <td class="item-total-cell">₺8.000,00</td>
+            <td><button class="btn-delete"><i class="fa-solid fa-xmark"></i></button></td>
+          </tr>
+          <tr><td colspan="7"><hr class="table-divider" /></td></tr>
+          <!-- Row 2 -->
+          <tr class="item-row">
+            <td><div class="item-num">2</div></td>
+            <td class="col-desc-cell"><input class="item-input" type="text" value="Mobil Uygulama Geliştirme" /></td>
+            <td class="col-qty-cell"><input class="item-input right" type="number" value="1" min="1" /></td>
+            <td class="col-unit-cell"><input class="item-input" type="text" value="Adet" /></td>
+            <td class="col-price-cell"><input class="item-input right" type="number" value="12000" /></td>
+            <td class="item-total-cell">₺12.000,00</td>
+            <td><button class="btn-delete"><i class="fa-solid fa-xmark"></i></button></td>
+          </tr>
+          <tr><td colspan="7"><hr class="table-divider" /></td></tr>
+          <!-- Row 3 -->
+          <tr class="item-row">
+            <td><div class="item-num">3</div></td>
+            <td class="col-desc-cell"><input class="item-input" type="text" value="SEO Optimizasyonu (3 Aylık)" /></td>
+            <td class="col-qty-cell"><input class="item-input right" type="number" value="3" min="1" /></td>
+            <td class="col-unit-cell"><input class="item-input" type="text" value="Ay" /></td>
+            <td class="col-price-cell"><input class="item-input right" type="number" value="1500" /></td>
+            <td class="item-total-cell">₺4.500,00</td>
+            <td><button class="btn-delete"><i class="fa-solid fa-xmark"></i></button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button class="btn-add-item">
+        <i class="fa-solid fa-plus"></i>
+        Yeni Madde Ekle
+      </button>
+    </div>
+
+    <!-- KART 4 — Fiyat Özeti -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon"><i class="fa-solid fa-calculator" style="color:#fff; font-size:12px;"></i></div>
+          Fiyat Özeti
+        </div>
+        <span class="badge">Adım 4 / 4</span>
+      </div>
+
+      <div class="kdv-option" style="margin-bottom:16px;">
+        <label>KDV Oranı:</label>
+        <select class="kdv-select">
+          <option value="20">%20</option>
+          <option value="10">%10</option>
+          <option value="8">%8</option>
+          <option value="1">%1</option>
+          <option value="0">KDV'siz</option>
+        </select>
+      </div>
+
+      <div class="price-summary">
+        <div class="price-row subtotal">
+          <span class="label"><i class="fa-solid fa-minus" style="margin-right:6px; font-size:10px;"></i> KDV Hariç Toplam</span>
+          <span class="value">₺24.500,00</span>
+        </div>
+        <div class="price-row kdv">
+          <span class="label"><i class="fa-solid fa-percent" style="margin-right:6px; font-size:10px;"></i> KDV (%20)</span>
+          <span class="value" style="color: var(--text3);">₺4.900,00</span>
+        </div>
+        <div class="price-row total">
+          <span class="label">💰 KDV Dahil Genel Toplam</span>
+          <span class="value">₺29.400,00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KART 5 — Saygılarımla -->
+    <div class="card regards-card">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="icon"><i class="fa-solid fa-signature" style="color:#fff; font-size:11px;"></i></div>
+          Kapanış
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Saygılarımla,</label>
+        <div class="field-wrap">
+          <i class="fa-solid fa-pen field-icon"></i>
+          <input type="text" placeholder="Ad Soyad / Unvan" value="Mehmet Demir" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Not (Opsiyonel)</label>
+        <textarea placeholder="Teklife ait özel not veya koşullar…"></textarea>
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="actions">
+      <button class="btn btn-secondary">
+        <i class="fa-solid fa-eye"></i> Önizle
+      </button>
+      <button class="btn btn-gold">
+        <i class="fa-solid fa-file-pdf"></i> PDF Oluştur
+      </button>
+      <button class="btn btn-primary">
+        <i class="fa-solid fa-share-nodes"></i> Paylaş
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ─── BOTTOM BAR ────────────────────────────────────────────── -->
+  <footer class="bottom-bar">
+    <div class="bottom-info">
+      <i class="fa-solid fa-location-dot"></i>
+      <span>Bağcılar, İstanbul</span>
+    </div>
+    <div class="bottom-divider"></div>
+    <div class="bottom-info">
+      <i class="fa-solid fa-phone"></i>
+      <span>0212 555 00 00</span>
+    </div>
+    <div class="bottom-divider"></div>
+    <div class="bottom-info">
+      <i class="fa-solid fa-envelope"></i>
+      <span>info@firma.com.tr</span>
+    </div>
+    <div class="bottom-divider"></div>
+    <div class="bottom-info">
+      <i class="fa-brands fa-whatsapp" style="color:#22c55e;"></i>
+      <span>0532 555 00 00</span>
+    </div>
+  </footer>
+
+</body>
+</html>

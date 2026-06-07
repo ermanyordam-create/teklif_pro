@@ -1,0 +1,14 @@
+# TeklifPro — GitHub Pages PWA
+# Sistem dosyaları
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editör
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Geçici
+*.log
+*.tmp

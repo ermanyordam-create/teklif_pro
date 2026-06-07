@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TeklifPro — Profesyonel Teklif Hazırlama</title>
+  <meta name="description" content="Hızlı ve profesyonel teklif oluşturma uygulaması. A4 format, PDF çıktısı, logo yükleme." />
+
+  <!-- ═══ PWA — Manifest & Theme ═══ -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- ═══ PWA — iOS / Safari ═══ -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="TeklifPro" />
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png" />
+
+  <!-- ═══ PWA — Favicon ═══ -->
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png" />
+
+  <!-- ═══ Fonts & Libraries ═══ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ════════════════════════════════════════════════
+       RESET & CSS VARIABLES
+    ════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #f2f4f7;
+      --surface:     #ffffff;
+      --surface2:    #f8f9fb;
+      --border:      #e3e6eb;
+      --border2:     #cdd2db;
+
+      --text:        #111827;
+      --text2:       #374151;
+      --text3:       #6b7280;
+      --text4:       #9ca3af;
+
+      --blue:        #1d4ed8;
+      --blue-lt:     #2563eb;
+      --blue-bg:     #eff6ff;
+      --blue-border: #bfdbfe;
+
+      --red:         #dc2626;
+      --red-bg:      #fef2f2;
+      --green:       #16a34a;
+      --green-bg:    #f0fdf4;
+
+      --topbar-h:    56px;
+      --form-w:      400px;
+      --r-xs:        4px;
+      --r-sm:        6px;
+      --r:           10px;
+      --r-lg:        14px;
+      --trans:       0.15s ease;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+
+    /* ════════════════════════════════════════════════
+       SCROLLBAR
+    ════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #b0b8c8; }
+
+    /* ════════════════════════════════════════════════
+       TOP BAR
+    ════════════════════════════════════════════════ */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: var(--topbar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 18px 0 20px;
+      gap: 12px;
+    }
+
+    .tb-logo {
+      display: flex; align-items: center; gap: 9px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 17px; font-weight: 700;
+      color: var(--text); text-decoration: none;
+      flex-shrink: 0;
+    }
+    .tb-logo .lm {
+      width: 30px; height: 30px;
+      background: var(--blue);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 14px;
+    }
+    .tb-logo .lt { color: var(--blue-lt); }
+
+    .tb-divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+    .tb-spacer  { flex: 1; }
+
+    .tb-teklif-no {
+      font-size: 12px; color: var(--text3);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 12px;
+      font-weight: 500;
+    }
+    .tb-teklif-no b { color: var(--blue); }
+
+    .tb-actions { display: flex; gap: 7px; align-items: center; }
+
+    /* ════════════════════════════════════════════════
+       BUTTONS
+    ════════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 13px;
+      border-radius: var(--r-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer; border: none;
+      transition: background var(--trans), color var(--trans), border-color var(--trans), box-shadow var(--trans);
+      white-space: nowrap; text-decoration: none;
+      -webkit-user-select: none; user-select: none;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn i { font-size: 12px; }
+
+    .btn-outline {
+      background: var(--surface); color: var(--text2);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { background: var(--surface2); border-color: var(--border2); }
+
+    .btn-primary {
+      background: var(--blue); color: #fff;
+      border: 1px solid var(--blue);
+    }
+    .btn-primary:hover { background: #1a44c0; }
+
+    .btn-ghost {
+      background: transparent; color: var(--text3);
+      border: 1px solid transparent; padding: 7px 9px;
+    }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+
+    .btn-danger-ghost {
+      background: transparent; color: var(--text4);
+      border: 1px solid transparent; padding: 4px 6px;
+    }
+    .btn-danger-ghost:hover { background: var(--red-bg); color: var(--red); }
+
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+    .btn-sm i { font-size: 11px; }
+
+    /* ════════════════════════════════════════════════
+       APP LAYOUT
+    ════════════════════════════════════════════════ */
+    .workspace {
+      display: flex;
+      margin-top: var(--topbar-h);
+      height: calc(100vh - var(--topbar-h));
+      overflow: hidden;
+    }
+
+    /* ════════════════════════════════════════════════
+       FORM PANEL
+    ════════════════════════════════════════════════ */
+    .form-panel {
+      width: var(--form-w);
+      min-width: var(--form-w);
+      height: 100%;
+      overflow-y: auto;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px;
+    }
+
+    .card-title {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--text3);
+      margin-bottom: 13px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .card-title i { color: var(--blue-lt); font-size: 11px; }
+
+    /* Form fields */
+    .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      font-size: 12px; font-weight: 500;
+      color: var(--text2);
+    }
+    .field label .opt { color: var(--text4); font-weight: 400; font-size: 11px; }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color var(--trans), background var(--trans), box-shadow var(--trans);
+      -webkit-appearance: none;
+    }
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: var(--blue-lt);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color: var(--text4); }
+    .field textarea { resize: vertical; min-height: 56px; }
+    .field select { cursor: pointer; }
+    .field select option { background: #fff; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* ════════════════════════════════════════════════
+       LOGO UPLOAD
+    ════════════════════════════════════════════════ */
+    .logo-dropzone {
+      border: 2px dashed var(--border2);
+      border-radius: var(--r);
+      padding: 18px 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: border-color var(--trans), background var(--trans);
+    }
+    .logo-dropzone:hover,
+    .logo-dropzone.over { border-color: var(--blue-lt); background: var(--blue-bg); }
+    .logo-dropzone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0;
+      cursor: pointer; width: 100%; height: 100%;
+    }
+    .logo-dropzone .dz-icon { font-size: 22px; color: var(--text4); margin-bottom: 6px; }
+    .logo-dropzone .dz-label { font-size: 13px; color: var(--text3); font-weight: 500; }
+    .logo-dropzone .dz-hint  { font-size: 11px; color: var(--text4); margin-top: 2px; }
+
+    .logo-preview-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+    }
+    .logo-preview-row img {
+      max-height: 44px; max-width: 90px;
+      object-fit: contain;
+    }
+    .logo-preview-row .lp-name {
+      flex: 1; font-size: 12px; color: var(--text3);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* ════════════════════════════════════════════════
+       ITEMS LIST
+    ════════════════════════════════════════════════ */
+    .items-container { display: flex; flex-direction: column; gap: 8px; }
+
+    .item-row {
+      display: flex; gap: 7px; align-items: flex-start;
+      animation: fadeIn 0.18s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .item-badge {
+      width: 24px; height: 24px; flex-shrink: 0;
+      background: var(--blue);
+      color: #fff; font-size: 11px; font-weight: 700;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 8px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .item-row textarea {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 7px 9px;
+      resize: none;
+      outline: none;
+      min-height: 50px;
+      transition: border-color var(--trans), background var(--trans);
+      overflow: hidden;
+    }
+    .item-row textarea:focus {
+      border-color: var(--blue-lt);
+      background: #fff;
+    }
+    .item-row textarea::placeholder { color: var(--text4); }
+
+    .btn-add-item {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      width: 100%; padding: 9px;
+      background: var(--blue-bg);
+      border: 1.5px dashed var(--blue-border);
+      border-radius: var(--r-sm);
+      color: var(--blue-lt);
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: background var(--trans), border-color var(--trans);
+      margin-top: 6px;
+    }
+    .btn-add-item:hover { background: #dbeafe; border-color: var(--blue-lt); }
+
+    /* ════════════════════════════════════════════════
+       PRICE SUMMARY DISPLAY
+    ════════════════════════════════════════════════ */
+    .price-grid {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .pg-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .pg-row:last-child { border-bottom: none; background: #fff; }
+    .pg-row .lbl { color: var(--text3); }
+    .pg-row .val { font-weight: 600; color: var(--text); }
+    .pg-row:last-child .lbl { color: var(--text2); font-weight: 600; }
+    .pg-row:last-child .val { color: var(--blue); font-size: 15px; }
+
+    /* ════════════════════════════════════════════════
+       PREVIEW PANEL
+    ════════════════════════════════════════════════ */
+    .preview-panel {
+      flex: 1;
+      overflow: auto;
+      background: #c8cdd6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      gap: 12px;
+    }
+
+    .preview-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; color: rgba(255,255,255,0.7);
+      text-transform: uppercase; letter-spacing: 0.6px; font-weight: 500;
+      flex-shrink: 0;
+    }
+    .preview-label i { font-size: 10px; }
+
+    .a4-outer {
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    /* ════════════════════════════════════════════════
+       A4 DOCUMENT — exact pixel dimensions
+    ════════════════════════════════════════════════ */
+    #a4-doc {
+      width: 794px;
+      background: #fff;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      font-family: 'Inter', Arial, sans-serif;
+      min-height: 1123px;
+    }
+
+    /* ── Document body ── */
+    .doc-body {
+      flex: 1;
+      padding: 50px 60px 44px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Watermark ── */
+    #doc-wm {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-15deg);
+      max-width: 320px; max-height: 320px;
+      object-fit: contain;
+      opacity: 0.07;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* ── Header: Logo + Date ── */
+    .doc-header {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    #doc-logo-wrap { max-width: 200px; }
+    #doc-logo { max-height: 88px; max-width: 190px; object-fit: contain; display: block; }
+    .doc-logo-ph {
+      width: 80px; height: 80px;
+      border: 2px dashed #d1d5db;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #9ca3af; text-align: center;
+    }
+
+    .doc-date {
+      font-size: 14px;
+      color: #374151;
+      text-align: right;
+      padding-top: 4px;
+    }
+    .doc-date .dl { color: #6b7280; }
+
+    /* ── Divider ── */
+    .doc-hr {
+      border: none;
+      border-top: 1.5px solid #111827;
+      margin: 0 0 32px;
+    }
+
+    /* ── Recipient ── */
+    .doc-recipient {
+      font-size: 13px; color: #374151;
+      margin-bottom: 18px;
+      font-style: italic;
+    }
+
+    /* ── Title ── */
+    .doc-title {
+      font-size: 19px; font-weight: 700;
+      color: #111827;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      line-height: 1.3;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Items ── */
+    .doc-items { margin-bottom: 30px; }
+    .doc-item {
+      display: flex; gap: 6px;
+      margin-bottom: 14px;
+      font-size: 14px; color: #1a1a1a;
+      line-height: 1.65;
+    }
+    .doc-item-n { flex-shrink: 0; font-weight: 600; min-width: 22px; }
+
+    /* ── Price ── */
+    .doc-price { margin-bottom: 36px; }
+    .doc-price-main {
+      font-size: 15px; font-weight: 700;
+      color: #111827;
+      margin-bottom: 5px;
+    }
+    .doc-price-sub {
+      font-size: 14px; color: #374151;
+      margin-bottom: 4px;
+    }
+
+    /* ── Note ── */
+    .doc-note {
+      font-size: 13px; color: #6b7280;
+      border-left: 3px solid #e5e7eb;
+      padding-left: 12px;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* ── Regards ── */
+    .doc-regards {
+      font-size: 14px; color: #1a1a1a;
+      line-height: 1.9;
+    }
+    .doc-regards .regards-name { font-weight: 700; }
+
+    /* ── Footer ── */
+    .doc-footer {
+      background: #1c1c1e;
+      color: #d1d5db;
+      padding: 13px 60px;
+      font-size: 12px;
+      line-height: 1.8;
+      text-align: center;
+    }
+    .doc-footer .f-addr { color: #e5e7eb; }
+    .doc-footer .f-contact { color: #9ca3af; font-size: 11px; }
+
+    /* ════════════════════════════════════════════════
+       MODAL
+    ════════════════════════════════════════════════ */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(17,24,39,0.35);
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 24px;
+      width: 460px; max-width: 94vw;
+      max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      animation: modalIn 0.18s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.97) translateY(-6px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 18px;
+    }
+    .modal-header h2 { font-size: 15px; font-weight: 700; }
+    .modal-close {
+      background: none; border: none;
+      font-size: 18px; color: var(--text3);
+      cursor: pointer; padding: 3px 7px;
+      border-radius: var(--r-xs);
+      transition: background var(--trans);
+    }
+    .modal-close:hover { background: var(--bg); color: var(--text); }
+
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      margin-top: 18px; padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ════════════════════════════════════════════════
+       TOAST
+    ════════════════════════════════════════════════ */
+    #toasts {
+      position: fixed; bottom: 20px; right: 20px; z-index: 999;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #111827; color: #fff;
+      padding: 10px 15px;
+      border-radius: var(--r-sm);
+      font-size: 13px;
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+      pointer-events: auto;
+      animation: toastIn 0.2s ease;
+    }
+    .toast.ok  { background: var(--green); }
+    .toast.err { background: var(--red); }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(16px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ════════════════════════════════════════════════
+       LOADING OVERLAY
+    ════════════════════════════════════════════════ */
+    #loading {
+      position: fixed; inset: 0; z-index: 400;
+      background: rgba(255,255,255,0.85);
+      display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 14px;
+    }
+    #loading.show { display: flex; }
+    .spin {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border2);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-msg { font-size: 14px; color: var(--text3); }
+
+    /* ════════════════════════════════════════════════
+       UTILITIES
+    ════════════════════════════════════════════════ */
+    .hidden { display: none !important; }
+    .mt-6  { margin-top: 6px; }
+    .mt-10 { margin-top: 10px; }
+
+    /* ════════════════════════════════════════════════
+       PRINT MEDIA
+    ════════════════════════════════════════════════ */
+    @page { size: A4 portrait; margin: 0; }
+
+    @media print {
+      .topbar, .form-panel, .preview-label,
+      #loading, #toasts, .modal-backdrop { display: none !important; }
+
+      body { overflow: visible; background: #fff; }
+
+      .workspace {
+        margin-top: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      .preview-panel {
+        padding: 0 !important;
+        background: #fff !important;
+        overflow: visible !important;
+        height: auto !important;
+      }
+      .a4-outer {
+        width: 100% !important;
+        height: auto !important;
+      }
+      #a4-doc {
+        transform: none !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        min-height: 100vh;
+      }
+      .doc-body { padding: 40px 50px 36px !important; }
+      .doc-footer { padding: 12px 50px !important; }
+    }
+
+    /* ════════════════════════════════════════════════
+       MOBİL ALT NAVİGASYON
+    ════════════════════════════════════════════════ */
+    .bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 58px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 190;
+      padding: 0 8px;
+    }
+    .bnav-item {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px;
+      background: none; border: none;
+      color: var(--text3);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 500;
+      cursor: pointer;
+      padding: 6px 4px;
+      border-radius: var(--r-sm);
+      transition: color var(--trans), background var(--trans);
+    }
+    .bnav-item i { font-size: 18px; }
+    .bnav-item.active { color: var(--blue); }
+    .bnav-item.bnav-pdf {
+      color: #fff;
+      background: var(--blue);
+      border-radius: var(--r);
+      margin: 6px 4px;
+    }
+    .bnav-item.bnav-pdf:hover { background: #1a44c0; }
+
+    /* ════════════════════════════════════════════════
+       RESPONSIVE — TABLET (860px)
+    ════════════════════════════════════════════════ */
+    @media (max-width: 860px) {
+      :root { --form-w: 320px; }
+      .tb-teklif-no { display: none; }
+    }
+
+    /* ════════════════════════════════════════════════
+       RESPONSIVE — MOBİL (768px ve altı)
+    ════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      /* Bottom nav görünür */
+      .bottom-nav { display: flex; }
+
+      /* Topbar sıkıştır */
+      .topbar { padding: 0 12px; gap: 8px; }
+      .tb-logo .lt { display: none; }
+      .tb-teklif-no { display: none; }
+      .tb-divider { display: none; }
+
+      /* Topbar aksiyonları gizle — alt navda var */
+      .tb-actions .btn-outline { display: none; }
+      .tb-actions #pdf-btn    { display: none; }
+
+      /* Workspace: topbar altından bottom nav üstüne */
+      .workspace {
+        margin-top: var(--topbar-h);
+        height: calc(100vh - var(--topbar-h) - 58px);
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Form panel — tam ekran, varsayılan görünür */
+      .form-panel {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100% !important;
+        min-width: unset !important;
+        height: 100%;
+        border-right: none;
+        z-index: 10;
+        transform: translateX(0);
+        transition: transform 0.25s ease, opacity 0.25s ease;
+        opacity: 1;
+        display: flex;
+      }
+      .form-panel.tab-hidden {
+        transform: translateX(-100%);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* Preview panel — tam ekran, başlangıçta gizli */
+      .preview-panel {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 10;
+        padding: 12px;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: transform 0.25s ease, opacity 0.25s ease;
+        pointer-events: none;
+      }
+      .preview-panel.tab-active {
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* A4 önizleme mobilde daha kompakt */
+      .preview-panel { gap: 8px; }
+      .preview-label { font-size: 10px; }
+
+      /* Kartlar daha kompakt */
+      .card { padding: 12px; }
+      .card-title { margin-bottom: 10px; }
+      .field-row { grid-template-columns: 1fr; gap: 8px; }
+    }
+
+    /* ════════════════════════════════════════════════
+       RESPONSIVE — KÜÇÜK MOBİL (400px altı)
+    ════════════════════════════════════════════════ */
+    @media (max-width: 400px) {
+      .topbar { padding: 0 8px; }
+      .tb-logo { font-size: 15px; }
+      .tb-logo .lm { width: 26px; height: 26px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     LOADING OVERLAY
+════════════════════════════════════════════════ -->
+<div id="loading">
+  <div class="spin"></div>
+  <div id="loading-msg">PDF hazırlanıyor…</div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     SETTINGS MODAL
+════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="settings-modal">
+  <div class="modal" role="dialog" aria-label="İletişim Bilgileri">
+    <div class="modal-header">
+      <h2><i class="fa-solid fa-address-card" style="color:var(--blue-lt);margin-right:7px;"></i>İletişim Bilgileri</h2>
+      <button class="modal-close" onclick="closeModal('settings-modal')">&#x2715;</button>
+    </div>
+    <div class="field">
+      <label>Firma / Şirket Adı</label>
+      <input type="text" id="s-company" placeholder="Şirket Adı" />
+    </div>
+    <div class="field">
+      <label>Adres</label>
+      <input type="text" id="s-address" placeholder="Mahalle, Sokak, İl / İlçe" />
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Telefon / GSM</label>
+        <input type="tel" id="s-phone" placeholder="0532 000 00 00" />
+      </div>
+      <div class="field">
+        <label>E-posta</label>
+        <input type="email" id="s-email" placeholder="info@firma.com" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Web Sitesi <span class="opt">(opsiyonel)</span></label>
+      <input type="text" id="s-web" placeholder="www.firma.com" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('settings-modal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveSettings()">
+        <i class="fa-solid fa-check"></i> Kaydet
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     TOAST CONTAINER
+════════════════════════════════════════════════ -->
+<div id="toasts"></div>
+
+<!-- ════════════════════════════════════════════════
+     TOP BAR
+════════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="tb-logo">
+    <div class="lm">⚡</div>
+    Teklif<span class="lt">Pro</span>
+  </div>
+  <div class="tb-divider"></div>
+  <div class="tb-teklif-no">Teklif <b id="tb-no">#2024-0001</b></div>
+  <div class="tb-spacer"></div>
+  <div class="tb-actions">
+    <button class="btn btn-outline btn-sm" onclick="openModal('settings-modal')" title="İletişim bilgileri">
+      <i class="fa-solid fa-gear"></i>
+      <span class="btn-label">İletişim</span>
+    </button>
+    <div class="tb-divider"></div>
+    <button class="btn btn-outline btn-sm" onclick="printDoc()" title="Yazdır (Ctrl+P)">
+      <i class="fa-solid fa-print"></i>
+      <span class="btn-label">Yazdır</span>
+    </button>
+    <button class="btn btn-outline btn-sm" onclick="shareDoc()" title="Paylaş">
+      <i class="fa-solid fa-share-nodes"></i>
+      <span class="btn-label">Paylaş</span>
+    </button>
+    <button class="btn btn-primary btn-sm" id="pdf-btn" onclick="downloadPDF()">
+      <i class="fa-solid fa-file-pdf"></i>
+      <span class="btn-label">PDF İndir</span>
+    </button>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════
+     MOBİL ALT NAVİGASYON
+════════════════════════════════════════════════ -->
+<nav class="bottom-nav" id="bottom-nav" role="navigation" aria-label="Uygulama gezintisi">
+  <button class="bnav-item active" id="bnav-form" onclick="switchMobileTab('form')" aria-label="Teklif formu">
+    <i class="fa-solid fa-pen-to-square"></i>
+    <span>Form</span>
+  </button>
+  <button class="bnav-item" id="bnav-preview" onclick="switchMobileTab('preview')" aria-label="Önizleme">
+    <i class="fa-solid fa-eye"></i>
+    <span>Önizle</span>
+  </button>
+  <button class="bnav-item" onclick="shareDoc()" aria-label="Paylaş">
+    <i class="fa-solid fa-share-nodes"></i>
+    <span>Paylaş</span>
+  </button>
+  <button class="bnav-item bnav-pdf" onclick="downloadPDF()" aria-label="PDF indir">
+    <i class="fa-solid fa-file-pdf"></i>
+    <span>PDF</span>
+  </button>
+</nav>
+
+<!-- ════════════════════════════════════════════════
+     WORKSPACE
+════════════════════════════════════════════════ -->
+<div class="workspace">
+
+  <!-- ─── FORM PANEL ───────────────────────────────── -->
+  <aside class="form-panel" id="form-panel">
+
+    <!-- Logo -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-image"></i> Firma Logosu</div>
+      <div id="logo-dz" class="logo-dropzone">
+        <input type="file" id="logo-file" accept="image/*" aria-label="Logo dosyası seç" />
+        <div class="dz-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <div class="dz-label">Logo yükle veya sürükle bırak</div>
+        <div class="dz-hint">PNG · JPG · SVG · Maks 5 MB</div>
+      </div>
+      <div id="logo-preview" class="logo-preview-row hidden">
+        <img id="logo-prev-img" src="" alt="Logo önizleme" />
+        <span class="lp-name" id="logo-prev-name">logo.png</span>
+        <button class="btn btn-danger-ghost btn-sm" onclick="removeLogo()" title="Logoyu kaldır">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Teklif Bilgileri -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-file-lines"></i> Teklif Bilgileri</div>
+      <div class="field">
+        <label>Teklif Başlığı / Konusu</label>
+        <input type="text" id="f-title"
+          placeholder="ör: Fiyat Teklifi"
+          oninput="syncState('title', this.value); updateDoc()" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Teklif Tarihi</label>
+          <input type="date" id="f-date" onchange="onDateChange()" />
+        </div>
+        <div class="field">
+          <label>Teklif No</label>
+          <input type="text" id="f-no" placeholder="#2024-001"
+            oninput="syncState('no', this.value); updateDoc()" />
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Teklif Verilen <span class="opt">(opsiyonel)</span></label>
+        <input type="text" id="f-recipient" placeholder="Firma veya kişi adı"
+          oninput="syncState('recipient', this.value); updateDoc()" />
+      </div>
+    </div>
+
+    <!-- Teklif Maddeleri -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-list-check"></i> Teklif Maddeleri</div>
+      <div class="items-container" id="items-container"></div>
+      <button class="btn-add-item" onclick="addItem()">
+        <i class="fa-solid fa-plus"></i> Madde Ekle
+      </button>
+    </div>
+
+    <!-- Fiyat -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-turkish-lira-sign"></i> Fiyat</div>
+      <div class="field">
+        <label>Tutar (₺) — KDV Hariç</label>
+        <input type="number" id="f-price" placeholder="0,00" min="0" step="0.01"
+          oninput="onPriceChange()" />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>KDV Oranı</label>
+          <select id="f-kdv" onchange="onPriceChange()">
+            <option value="20">%20</option>
+            <option value="10">%10</option>
+            <option value="8">%8</option>
+            <option value="1">%1</option>
+            <option value="0">KDV Yok</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Teklifte Göster</label>
+          <select id="f-price-mode" onchange="onPriceChange()">
+            <option value="both">KDV'li ve KDV'siz</option>
+            <option value="incl">Yalnızca KDV Dahil</option>
+            <option value="excl">Yalnızca KDV Hariç</option>
+          </select>
+        </div>
+      </div>
+      <div class="price-grid" id="price-grid">
+        <div class="pg-row">
+          <span class="lbl">KDV Hariç</span>
+          <span class="val" id="pg-excl">₺0,00</span>
+        </div>
+        <div class="pg-row">
+          <span class="lbl">KDV (<span id="pg-rate">%20</span>)</span>
+          <span class="val" id="pg-kdv">₺0,00</span>
+        </div>
+        <div class="pg-row">
+          <span class="lbl">KDV Dahil Toplam</span>
+          <span class="val" id="pg-incl">₺0,00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kapanış -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-pen-nib"></i> Kapanış</div>
+      <div class="field">
+        <label>Ad Soyad / Unvan</label>
+        <input type="text" id="f-name" placeholder="Adınız Soyadınız"
+          oninput="syncState('name', this.value); updateDoc()" />
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>Ek Not <span class="opt">(opsiyonel)</span></label>
+        <textarea id="f-note" placeholder="Ek koşullar veya notlar…"
+          oninput="syncState('note', this.value); updateDoc()"></textarea>
+      </div>
+    </div>
+
+    <!-- bottom spacer -->
+    <div style="height:10px;"></div>
+  </aside>
+
+  <!-- ─── PREVIEW PANEL ─────────────────────────────── -->
+  <main class="preview-panel" id="preview-panel">
+    <div class="preview-label">
+      <i class="fa-solid fa-file-lines"></i>
+      Canlı Önizleme &nbsp;·&nbsp; A4 (210 × 297 mm)
+    </div>
+
+    <!-- A4 Document -->
+    <div class="a4-outer" id="a4-outer">
+      <div id="a4-doc">
+
+        <!-- Document body -->
+        <div class="doc-body">
+
+          <!-- Watermark -->
+          <img id="doc-wm" src="" alt="" class="hidden" />
+
+          <!-- Header -->
+          <div class="doc-header">
+            <div id="doc-logo-wrap">
+              <div class="doc-logo-ph" id="doc-logo-ph">Logo</div>
+              <img id="doc-logo" src="" alt="Logo" class="hidden" />
+            </div>
+            <div class="doc-date">
+              <span class="dl">Tarih: &nbsp;</span><span id="doc-date-val">—</span>
+            </div>
+          </div>
+
+          <hr class="doc-hr" />
+
+          <!-- Recipient -->
+          <div class="doc-recipient hidden" id="doc-recipient">
+            Sayın: <strong id="doc-recipient-val"></strong>
+          </div>
+
+          <!-- Title -->
+          <div class="doc-title" id="doc-title">FİYAT TEKLİFİ</div>
+
+          <!-- Items -->
+          <div class="doc-items" id="doc-items"></div>
+
+          <!-- Price -->
+          <div class="doc-price" id="doc-price"></div>
+
+          <!-- Note -->
+          <div class="doc-note hidden" id="doc-note"></div>
+
+          <!-- Regards -->
+          <div class="doc-regards">
+            <div>Saygılarımla,</div>
+            <div class="regards-name" id="doc-name">—</div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="doc-footer">
+          <div class="f-addr"  id="doc-f-addr">İletişim bilgilerini eklemek için ⚙ İletişim butonunu kullanın</div>
+          <div class="f-contact" id="doc-f-contact"></div>
+        </div>
+
+      </div><!-- #a4-doc -->
+    </div><!-- .a4-outer -->
+  </main>
+
+</div><!-- .workspace -->
+
+<!-- ════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ────────────────────────────────────────────────
+   STATE
+──────────────────────────────────────────────── */
+const S = {
+  logo:       null,   // data URL
+  logoName:   '',
+  title:      '',
+  date:       '',
+  no:         '',
+  recipient:  '',
+  items:      ['', ''],
+  price:      0,
+  kdv:        20,
+  priceMode:  'both',
+  name:       '',
+  note:       '',
+  cfg: {
+    company: '', address: '', phone: '', email: '', web: ''
+  }
+};
+
+/* ────────────────────────────────────────────────
+   INIT
+──────────────────────────────────────────────── */
+function init() {
+  // today date
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const y = now.getFullYear(), m = pad(now.getMonth()+1), d = pad(now.getDate());
+  document.getElementById('f-date').value = `${y}-${m}-${d}`;
+  S.date = `${d}/${m}/${y}`;
+
+  // teklif no
+  const no = `#${y}-${String(Math.floor(Math.random()*99)+1).padStart(4,'0')}`;
+  document.getElementById('f-no').value = no;
+  S.no = no;
+  document.getElementById('tb-no').textContent = no;
+
+  // load settings
+  const saved = localStorage.getItem('tp-cfg');
+  if (saved) {
+    try { Object.assign(S.cfg, JSON.parse(saved)); fillSettingsForm(); } catch {}
+  }
+
+  // logo upload
+  const fileInput = document.getElementById('logo-file');
+  fileInput.addEventListener('change', e => { if (e.target.files[0]) processLogo(e.target.files[0]); });
+
+  const dz = document.getElementById('logo-dz');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files[0]) processLogo(e.dataTransfer.files[0]);
+  });
+
+  // auto-grow textareas
+  document.addEventListener('input', e => {
+    if (e.target.tagName === 'TEXTAREA') autoGrow(e.target);
+  });
+
+  // close modal on backdrop click
+  document.getElementById('settings-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal('settings-modal');
+  });
+
+  // keyboard shortcut
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault(); printDoc();
+    }
+  });
+
+  renderItemsList();
+  updateDoc();
+  scaleA4();
+  window.addEventListener('resize', scaleA4);
+}
+
+function autoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 2) + 'px';
+}
+
+/* ────────────────────────────────────────────────
+   SCALE A4
+──────────────────────────────────────────────── */
+function scaleA4() {
+  const panel  = document.getElementById('preview-panel');
+  const outer  = document.getElementById('a4-outer');
+  const a4     = document.getElementById('a4-doc');
+  if (!panel || !outer || !a4) return;
+
+  const availW = panel.clientWidth - 40;
+  const docW   = 794;
+  const scale  = Math.min(availW / docW, 1.0);
+
+  a4.style.transform       = `scale(${scale})`;
+  a4.style.transformOrigin = 'top center';
+
+  // Make outer match scaled dimensions so panel scrolls correctly
+  const scaledH = a4.getBoundingClientRect().height;
+  outer.style.width  = `${docW * scale}px`;
+  outer.style.height = `${scaledH}px`;
+}
+
+/* ────────────────────────────────────────────────
+   LOGO
+──────────────────────────────────────────────── */
+function processLogo(file) {
+  if (!file.type.startsWith('image/'))     { toast('Geçerli bir resim dosyası seçin.', 'err'); return; }
+  if (file.size > 5 * 1024 * 1024)         { toast('Dosya 5 MB sınırını aşıyor.', 'err'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    S.logo = e.target.result;
+    S.logoName = file.name;
+
+    // form panel preview
+    document.getElementById('logo-prev-img').src  = S.logo;
+    document.getElementById('logo-prev-name').textContent = file.name;
+    document.getElementById('logo-dz').classList.add('hidden');
+    document.getElementById('logo-preview').classList.remove('hidden');
+
+    updateDoc();
+    toast('Logo yüklendi.', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLogo() {
+  S.logo = null; S.logoName = '';
+  document.getElementById('logo-file').value = '';
+  document.getElementById('logo-preview').classList.add('hidden');
+  document.getElementById('logo-dz').classList.remove('hidden');
+  updateDoc();
+}
+
+/* ────────────────────────────────────────────────
+   ITEMS
+──────────────────────────────────────────────── */
+function renderItemsList() {
+  const container = document.getElementById('items-container');
+  container.innerHTML = '';
+
+  S.items.forEach((txt, i) => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.dataset.idx = i;
+    row.innerHTML = `
+      <div class="item-badge">${i + 1}</div>
+      <textarea rows="2"
+        placeholder="Madde açıklaması…"
+        oninput="updateItemText(${i}, this.value)">${escH(txt)}</textarea>
+      <button class="btn btn-danger-ghost" onclick="removeItem(${i})" title="Sil">
+        <i class="fa-solid fa-xmark"></i>
+      </button>`;
+    container.appendChild(row);
+    // auto-grow after render
+    const ta = row.querySelector('textarea');
+    setTimeout(() => autoGrow(ta), 0);
+  });
+}
+
+function addItem() {
+  S.items.push('');
+  renderItemsList();
+  const tas = document.querySelectorAll('#items-container textarea');
+  if (tas.length) tas[tas.length - 1].focus();
+  updateDoc();
+}
+
+function removeItem(i) {
+  if (S.items.length <= 1) { S.items[0] = ''; renderItemsList(); updateDoc(); return; }
+  S.items.splice(i, 1);
+  renderItemsList();
+  updateDoc();
+}
+
+function updateItemText(i, val) {
+  S.items[i] = val;
+  updateDoc();
+}
+
+/* ────────────────────────────────────────────────
+   PRICE
+──────────────────────────────────────────────── */
+function onPriceChange() {
+  S.price     = parseFloat(document.getElementById('f-price').value) || 0;
+  S.kdv       = parseInt(document.getElementById('f-kdv').value)     || 0;
+  S.priceMode = document.getElementById('f-price-mode').value;
+
+  const kdvAmt = S.price * S.kdv / 100;
+  const total  = S.price + kdvAmt;
+
+  document.getElementById('pg-excl').textContent = '₺' + fmt(S.price);
+  document.getElementById('pg-kdv').textContent  = '₺' + fmt(kdvAmt);
+  document.getElementById('pg-incl').textContent = '₺' + fmt(total);
+  document.getElementById('pg-rate').textContent = '%' + S.kdv;
+
+  updateDoc();
+}
+
+function fmt(n) {
+  return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/* ────────────────────────────────────────────────
+   DATE
+──────────────────────────────────────────────── */
+function onDateChange() {
+  const val = document.getElementById('f-date').value;
+  if (!val) { S.date = '—'; updateDoc(); return; }
+  const [y, m, d] = val.split('-');
+  S.date = `${d}/${m}/${y}`;
+  updateDoc();
+}
+
+/* ────────────────────────────────────────────────
+   SYNC STATE (generic)
+──────────────────────────────────────────────── */
+function syncState(key, val) { S[key] = val; }
+
+/* ────────────────────────────────────────────────
+   UPDATE DOCUMENT (live render)
+──────────────────────────────────────────────── */
+function updateDoc() {
+  // Logo
+  const docLogo = document.getElementById('doc-logo');
+  const docLogoPh = document.getElementById('doc-logo-ph');
+  const docWm  = document.getElementById('doc-wm');
+
+  if (S.logo) {
+    docLogo.src = S.logo;
+    docLogo.classList.remove('hidden');
+    docLogoPh.classList.add('hidden');
+    docWm.src = S.logo;
+    docWm.classList.remove('hidden');
+  } else {
+    docLogo.classList.add('hidden');
+    docLogoPh.classList.remove('hidden');
+    docWm.classList.add('hidden');
+  }
+
+  // Date
+  document.getElementById('doc-date-val').textContent = S.date || '—';
+
+  // Teklif no in topbar
+  const noVal = document.getElementById('f-no').value;
+  document.getElementById('tb-no').textContent = noVal || '—';
+
+  // Recipient
+  const recip = document.getElementById('f-recipient').value.trim();
+  const docRecip = document.getElementById('doc-recipient');
+  if (recip) {
+    document.getElementById('doc-recipient-val').textContent = recip;
+    docRecip.classList.remove('hidden');
+  } else {
+    docRecip.classList.add('hidden');
+  }
+
+  // Title
+  const title = document.getElementById('f-title').value.trim();
+  document.getElementById('doc-title').textContent = title || 'FİYAT TEKLİFİ';
+
+  // Items
+  const docItems = document.getElementById('doc-items');
+  docItems.innerHTML = '';
+  S.items.forEach((txt, i) => {
+    if (!txt.trim()) return;
+    const div = document.createElement('div');
+    div.className = 'doc-item';
+    div.innerHTML = `<span class="doc-item-n">${i+1}-</span><span>${escH(txt)}</span>`;
+    docItems.appendChild(div);
+  });
+
+  // Price
+  renderDocPrice();
+
+  // Note
+  const note = document.getElementById('f-note').value.trim();
+  const docNote = document.getElementById('doc-note');
+  if (note) {
+    docNote.textContent = note;
+    docNote.classList.remove('hidden');
+  } else {
+    docNote.classList.add('hidden');
+  }
+
+  // Name
+  const name = document.getElementById('f-name').value.trim();
+  document.getElementById('doc-name').textContent = name || '—';
+
+  // Footer
+  renderDocFooter();
+
+  // Re-scale after content change
+  setTimeout(scaleA4, 50);
+}
+
+function renderDocPrice() {
+  const base     = S.price;
+  const kdvAmt   = base * S.kdv / 100;
+  const total    = base + kdvAmt;
+  const mode     = document.getElementById('f-price-mode').value;
+  const priceEl  = document.getElementById('doc-price');
+  priceEl.innerHTML = '';
+
+  if (base <= 0) return;
+
+  const makeRow = (cls, html) => {
+    const d = document.createElement('div');
+    d.className = cls; d.innerHTML = html; return d;
+  };
+
+  if (mode === 'both') {
+    if (S.kdv > 0) {
+      priceEl.appendChild(makeRow('doc-price-sub',
+        `<strong>Toplam İş Bedeli (KDV Hariç):</strong> &nbsp; ₺${fmt(base)}`));
+      priceEl.appendChild(makeRow('doc-price-main',
+        `<strong>Toplam İş Bedeli (KDV Dahil %${S.kdv}):</strong> &nbsp; ₺${fmt(total)}`));
+    } else {
+      priceEl.appendChild(makeRow('doc-price-main',
+        `<strong>Toplam İş Bedeli:</strong> &nbsp; ₺${fmt(base)}`));
+    }
+  } else if (mode === 'incl') {
+    const label = S.kdv > 0 ? ` (KDV Dahil %${S.kdv})` : '';
+    priceEl.appendChild(makeRow('doc-price-main',
+      `<strong>Toplam İş Bedeli:</strong> &nbsp; ₺${fmt(total)}${label}`));
+  } else {
+    const label = S.kdv > 0 ? ' (KDV Hariç)' : '';
+    priceEl.appendChild(makeRow('doc-price-main',
+      `<strong>Toplam İş Bedeli:</strong> &nbsp; ₺${fmt(base)}${label}`));
+  }
+}
+
+function renderDocFooter() {
+  const c = S.cfg;
+  const addrEl    = document.getElementById('doc-f-addr');
+  const contactEl = document.getElementById('doc-f-contact');
+
+  addrEl.textContent = c.address
+    ? `Adres: ${c.address}`
+    : 'İletişim bilgilerini eklemek için ⚙ İletişim butonunu kullanın';
+
+  const parts = [];
+  if (c.phone) parts.push(`Gsm: ${c.phone}`);
+  if (c.email) parts.push(`Eposta: ${c.email}`);
+  if (c.web)   parts.push(`Web: ${c.web}`);
+  contactEl.textContent = parts.length ? `İletişim: ${parts.join(' - ')}` : '';
+}
+
+/* ────────────────────────────────────────────────
+   SETTINGS
+──────────────────────────────────────────────── */
+function fillSettingsForm() {
+  document.getElementById('s-company').value = S.cfg.company || '';
+  document.getElementById('s-address').value = S.cfg.address || '';
+  document.getElementById('s-phone').value   = S.cfg.phone   || '';
+  document.getElementById('s-email').value   = S.cfg.email   || '';
+  document.getElementById('s-web').value     = S.cfg.web     || '';
+}
+
+function saveSettings() {
+  S.cfg.company = document.getElementById('s-company').value.trim();
+  S.cfg.address = document.getElementById('s-address').value.trim();
+  S.cfg.phone   = document.getElementById('s-phone').value.trim();
+  S.cfg.email   = document.getElementById('s-email').value.trim();
+  S.cfg.web     = document.getElementById('s-web').value.trim();
+  localStorage.setItem('tp-cfg', JSON.stringify(S.cfg));
+  renderDocFooter();
+  closeModal('settings-modal');
+  toast('İletişim bilgileri kaydedildi.', 'ok');
+}
+
+/* ────────────────────────────────────────────────
+   MODAL
+──────────────────────────────────────────────── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ────────────────────────────────────────────────
+   PDF GENERATION
+──────────────────────────────────────────────── */
+async function downloadPDF() {
+  const a4      = document.getElementById('a4-doc');
+  const loading = document.getElementById('loading');
+  loading.classList.add('show');
+  document.getElementById('loading-msg').textContent = 'PDF hazırlanıyor…';
+  document.getElementById('pdf-btn').disabled = true;
+
+  // Temporarily remove scale transform for accurate capture
+  const savedTransform = a4.style.transform;
+  const savedOrigin    = a4.style.transformOrigin;
+  a4.style.transform       = 'none';
+  a4.style.transformOrigin = 'unset';
+  a4.style.width = '794px'; // ensure
+
+  // allow browser to repaint
+  await new Promise(r => setTimeout(r, 150));
+
+  try {
+    const canvas = await html2canvas(a4, {
+      scale:           2.5,
+      useCORS:         true,
+      allowTaint:      true,
+      backgroundColor: '#ffffff',
+      width:           794,
+      windowWidth:     794,
+    });
+
+    const { jsPDF } = window.jspdf;
+
+    const imgW  = 210;    // A4 mm width
+    const ratio = canvas.width / imgW;
+    const imgH  = canvas.height / ratio;
+    const pageH = 297;    // A4 mm height
+
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+    if (imgH <= pageH) {
+      // Single page
+      pdf.addImage(canvas.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, imgW, imgH);
+    } else {
+      // Multi-page split
+      let yRemain = 0;
+      while (yRemain < canvas.height) {
+        const srcH    = Math.min(pageH * ratio, canvas.height - yRemain);
+        const pgCanvas = document.createElement('canvas');
+        pgCanvas.width  = canvas.width;
+        pgCanvas.height = srcH;
+        const ctx = pgCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, pgCanvas.width, pgCanvas.height);
+        ctx.drawImage(canvas, 0, yRemain, canvas.width, srcH, 0, 0, canvas.width, srcH);
+        const pgImg = pgCanvas.toDataURL('image/jpeg', 0.97);
+        if (yRemain > 0) pdf.addPage();
+        pdf.addImage(pgImg, 'JPEG', 0, 0, imgW, srcH / ratio);
+        yRemain += srcH;
+      }
+    }
+
+    // Build file name
+    const parts = [
+      document.getElementById('f-name').value.trim(),
+      document.getElementById('f-title').value.trim() || 'Teklif',
+      document.getElementById('f-date').value.replace(/-/g, '')
+    ].filter(Boolean);
+    const fileName = parts.join('_').replace(/\s+/g, '_') || 'TeklifPro';
+
+    pdf.save(`${fileName}.pdf`);
+    toast('PDF başarıyla indirildi.', 'ok');
+
+  } catch (err) {
+    console.error(err);
+    toast('PDF oluşturulurken hata oluştu: ' + err.message, 'err');
+  } finally {
+    // Restore transform
+    a4.style.transform       = savedTransform;
+    a4.style.transformOrigin = savedOrigin;
+    loading.classList.remove('show');
+    document.getElementById('pdf-btn').disabled = false;
+    scaleA4();
+  }
+}
+
+/* ────────────────────────────────────────────────
+   PRINT
+──────────────────────────────────────────────── */
+function printDoc() {
+  const a4 = document.getElementById('a4-doc');
+  const saved = a4.style.transform;
+  a4.style.transform = 'none';
+  a4.style.transformOrigin = 'unset';
+
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      a4.style.transform = saved;
+      a4.style.transformOrigin = 'top center';
+      scaleA4();
+    }, 500);
+  }, 80);
+}
+
+/* ────────────────────────────────────────────────
+   SHARE
+──────────────────────────────────────────────── */
+async function shareDoc() {
+  const title = document.getElementById('f-title').value.trim() || 'Fiyat Teklifi';
+
+  if (!navigator.share) {
+    toast('Paylaşım desteklenmiyor, PDF indiriliyor…');
+    await downloadPDF();
+    return;
+  }
+
+  const loading = document.getElementById('loading');
+  loading.classList.add('show');
+  document.getElementById('loading-msg').textContent = 'Paylaşım hazırlanıyor…';
+
+  try {
+    const a4 = document.getElementById('a4-doc');
+    const saved = a4.style.transform;
+    a4.style.transform = 'none';
+    a4.style.transformOrigin = 'unset';
+    await new Promise(r => setTimeout(r, 100));
+
+    const canvas = await html2canvas(a4, {
+      scale: 2, useCORS: true, allowTaint: true,
+      backgroundColor: '#ffffff', width: 794
+    });
+    a4.style.transform = saved;
+    a4.style.transformOrigin = 'top center';
+
+    const { jsPDF } = window.jspdf;
+    const imgW = 210;
+    const imgH = canvas.height / (canvas.width / imgW);
+    const pdf  = new jsPDF({ unit: 'mm', format: 'a4' });
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, imgW, imgH);
+    const blob = pdf.output('blob');
+    const file = new File([blob], `${title}.pdf`, { type: 'application/pdf' });
+
+    await navigator.share({ title, files: [file] });
+    toast('Paylaşım başarılı.', 'ok');
+  } catch (err) {
+    if (err.name !== 'AbortError') toast('Paylaşım hatası: ' + err.message, 'err');
+  } finally {
+    loading.classList.remove('show');
+    scaleA4();
+  }
+}
+
+/* ────────────────────────────────────────────────
+   TOAST
+──────────────────────────────────────────────── */
+function toast(msg, type = '') {
+  const icons = { ok: 'fa-check-circle', err: 'fa-triangle-exclamation', '': 'fa-info-circle' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fa-solid ${icons[type] || icons['']}"></i> ${msg}`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.style.opacity = '0', 3000);
+  setTimeout(() => t.remove(), 3400);
+}
+
+/* ────────────────────────────────────────────────
+   UTILS
+──────────────────────────────────────────────── */
+function escH(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
+}
+
+/* ────────────────────────────────────────────────
+   MOBİL TAB GEÇİŞİ
+──────────────────────────────────────────────── */
+function switchMobileTab(tab) {
+  const formPanel    = document.getElementById('form-panel');
+  const previewPanel = document.getElementById('preview-panel');
+  const bnavForm     = document.getElementById('bnav-form');
+  const bnavPreview  = document.getElementById('bnav-preview');
+
+  if (tab === 'form') {
+    formPanel.classList.remove('tab-hidden');
+    previewPanel.classList.remove('tab-active');
+    bnavForm.classList.add('active');
+    bnavPreview.classList.remove('active');
+  } else {
+    formPanel.classList.add('tab-hidden');
+    previewPanel.classList.add('tab-active');
+    bnavForm.classList.remove('active');
+    bnavPreview.classList.add('active');
+    // Ölçeklemeyi yenile
+    setTimeout(scaleA4, 280);
+  }
+}
+
+/* ────────────────────────────────────────────────
+   BOOT
+──────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', init);
+
+/* ────────────────────────────────────────────────
+   SERVICE WORKER KAYDI
+──────────────────────────────────────────────── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(reg => {
+        console.log('[TeklifPro] Service Worker kayıtlı:', reg.scope);
+
+        // Yeni sürüm varsa kullanıcıya bildir
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Güncelleme var — sessizce uygula
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+              window.location.reload();
+            }
+          });
+        });
+      })
+      .catch(err => console.warn('[TeklifPro] SW kayıt hatası:', err));
+  });
+}
+</script>
+</body>
+</html>
