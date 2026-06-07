@@ -429,7 +429,7 @@
       width: 65%;
       max-width: 600px;
       object-fit: contain;
-      opacity: 0.25;
+      opacity: 0.15;
       pointer-events: none;
       user-select: none;
     }
@@ -725,6 +725,9 @@
 
       /* Topbar aksiyonları gizle — alt navda var */
       .tb-actions .btn-outline { display: none; }
+      .tb-actions .btn-outline:first-child { display: inline-flex; border: none; padding: 6px; }
+      .tb-actions .btn-outline:first-child .btn-label { display: none; }
+      .tb-actions .btn-outline:first-child i { font-size: 20px; color: var(--text2); margin: 0; }
       .tb-actions #pdf-btn    { display: none; }
 
       /* Workspace: topbar altından bottom nav üstüne */
@@ -760,7 +763,8 @@
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
         z-index: 10;
-        padding: 12px;
+        padding: 12px 8px;
+        justify-content: flex-start;
         transform: translateX(100%);
         opacity: 0;
         transition: transform 0.25s ease, opacity 0.25s ease;
@@ -1200,7 +1204,8 @@ function scaleA4() {
   const a4     = document.getElementById('a4-doc');
   if (!panel || !outer || !a4) return;
 
-  const availW = panel.clientWidth - 40;
+  const isMobile = window.innerWidth <= 768;
+  const availW = panel.clientWidth - (isMobile ? 16 : 40);
   const docW   = 794;
   const scale  = Math.min(availW / docW, 1.0);
 
